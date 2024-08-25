@@ -119,10 +119,19 @@
         <video id="webcamFeed" class="webcam-feed" autoplay playsinline></video>
 
         <!-- 비디오 제어 버튼들 -->
-        <div style="">
-            <button id="pipButton" class="btn" style="position:absolute; bottom:0;color:white;margin-bottom:5%">
-                <i class="bi bi-display"></i> PIP
+        <div style="position: absolute; top: 3%; left: 3%; display: flex; align-items: center; gap: 10px;">
+            <!-- 카메라 선택 드롭다운 -->
+            <select id="cameraSelect" class="form-select form-select-sm" style="width: 200px; border-radius: 0px; opacity: 50%; ">
+                <!-- 카메라 목록이 여기에 추가됩니다 -->
+            </select>
+
+            <!-- PiP 버튼 -->
+            <button id="pipButton" class="btn btn-outline-light" style=" border: none">
+                <i class="bi bi-display"></i>
             </button>
+        </div>
+        <div style="position: absolute; bottom: 0; right: 0; padding: 10px; border-radius: 0px">
+            <img src="/static/images/logo2.png" alt="대구일과학고등학교" style="max-width: 200px;">
         </div>
     </div>
 </div>
@@ -153,16 +162,49 @@
 <script>
     const video = document.getElementById('webcamFeed');
     const pipButton = document.getElementById('pipButton');
+    const cameraSelect = document.getElementById('cameraSelect');
 
     // 웹캠 피드를 video 요소에 연결
-    async function startWebcam() {
+    async function startWebcam(deviceId = null) {
+        const constraints = {
+            video: deviceId ? {deviceId: {exact: deviceId}} : true
+        };
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({video: true});
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
             video.srcObject = stream;
         } catch (error) {
             console.error('Error accessing webcam: ', error);
         }
     }
+
+    // 사용 가능한 카메라 목록 가져오기
+    async function getCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+            // 기존 선택지 초기화
+            cameraSelect.innerHTML = '';
+            videoDevices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${cameraSelect.length + 1}`;
+                cameraSelect.appendChild(option);
+            });
+
+            // 첫 번째 카메라 선택 후 시작
+            if (videoDevices.length > 0) {
+                startWebcam(videoDevices[0].deviceId);
+            }
+        } catch (error) {
+            console.error('Error getting cameras: ', error);
+        }
+    }
+
+    // 선택된 카메라 변경 시 웹캠 피드 업데이트
+    cameraSelect.addEventListener('change', () => {
+        startWebcam(cameraSelect.value);
+    });
 
     // Picture-in-Picture 버튼 클릭 이벤트
     pipButton.addEventListener('click', async () => {
@@ -179,8 +221,8 @@
         }
     });
 
-    // 웹캠 시작
-    startWebcam();
+    // 초기화: 카메라 목록 가져오기
+    getCameras();
 </script>
 </body>
 </html>
