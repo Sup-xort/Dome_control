@@ -19,7 +19,7 @@
             width: 100%;
             max-width: 800px;
             height: auto;
-            display: none; /* 기본적으로 비디오 숨김 */
+            background-color: black; /* 영상이 없을 때 이 부분을 확인 */
         }
     </style>
 </head>
@@ -70,7 +70,8 @@
                 </div>
                 <div>
                     <a href="{% url 'power' %}">
-                        <button type="button" class="btn btn-danger" style="width: 50px; height: 40px; border-radius: 0;">
+                        <button type="button" class="btn btn-danger"
+                                style="width: 50px; height: 40px; border-radius: 0;">
                             <i class="bi bi-power"></i>
                         </button>
                     </a>
@@ -114,12 +115,14 @@
 
     <!-- 우측 패널 -->
     <div style="background-color: black; width: 60%; text-align: center; position: relative;">
-        <button id="toggleButton" class="btn btn-outline-light mt-3">
-            <i class="bi bi-camera-video"></i>
-        </button>
-        <img src="{% url 'video_feed' %}" class="webcam-feed" id="webcamFeed" alt="Webcam Feed">
-        <div style="position: absolute; bottom: 0; right: 0; padding: 10px;">
-            <img src="/static/images/logo2.png" alt="대구일과학고등학교" style="max-width: 220px;">
+        <!-- 비디오 태그 -->
+        <video id="webcamFeed" class="webcam-feed" autoplay playsinline></video>
+
+        <!-- 비디오 제어 버튼들 -->
+        <div style="">
+            <button id="pipButton" class="btn" style="position:absolute; bottom:0;color:white;margin-bottom:5%">
+                <i class="bi bi-display"></i> PIP
+            </button>
         </div>
     </div>
 </div>
@@ -145,24 +148,39 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS 및 Bootstrap Icons -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const toastElList = [].slice.call(document.querySelectorAll('.toast'))
-    const toastList = toastElList.map(function (toastEl) {
-        return new bootstrap.Toast(toastEl).show();
-    });
+    const video = document.getElementById('webcamFeed');
+    const pipButton = document.getElementById('pipButton');
 
-    const webcamFeed = document.getElementById('webcamFeed');
-    const toggleButton = document.getElementById('toggleButton');
+    // 웹캠 피드를 video 요소에 연결
+    async function startWebcam() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({video: true});
+            video.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing webcam: ', error);
+        }
+    }
 
-    toggleButton.addEventListener('click', function () {
-        if (webcamFeed.style.display === 'none') {
-            webcamFeed.style.display = 'block';
-            toggleButton.innerHTML = '<i class="bi bi-camera-video-off"></i>';
+    // Picture-in-Picture 버튼 클릭 이벤트
+    pipButton.addEventListener('click', async () => {
+        if (video !== document.pictureInPictureElement) {
+            try {
+                await video.requestPictureInPicture();
+            } catch (error) {
+                console.error('Failed to enter Picture-in-Picture mode:', error);
+            }
         } else {
-            webcamFeed.style.display = 'none';
-            toggleButton.innerHTML = '<i class="bi bi-camera-video"></i>';
+            document.exitPictureInPicture().catch(error => {
+                console.error('Failed to exit Picture-in-Picture mode:', error);
+            });
         }
     });
+
+    // 웹캠 시작
+    startWebcam();
 </script>
 </body>
 </html>
