@@ -110,18 +110,17 @@
 
             </div>
         </div>
-        <div style="position: absolute; bottom: 0; text-align: center; padding: 10px;">
-                <img src="https://dg1s.dge.hs.kr/upload/dg1sh/logo/img_6f5dv807b=ceve1=4fv9f=a1v29=3c97v21f1vd5d0_v5548.png"
-                     alt="대구일과학고등학교" style="max-width: 200px;">
-        </div>
     </div>
 
     <!-- 우측 패널 -->
-    <div style="background-color: black; width: 60%">
-        <img src="{% url 'video_feed' %}" class="webcam-feed" id="webcamFeed" alt="Webcam Feed">
+    <div style="background-color: black; width: 60%; text-align: center; position: relative;">
         <button id="toggleButton" class="btn btn-outline-light mt-3">
             <i class="bi bi-camera-video"></i>
         </button>
+        <img src="{% url 'video_feed' %}" class="webcam-feed" id="webcamFeed" alt="Webcam Feed">
+        <div style="position: absolute; bottom: 0; right: 0; padding: 10px;">
+            <img src="/static/images/logo2.png" alt="대구일과학고등학교" style="max-width: 220px;">
+        </div>
     </div>
 </div>
 
